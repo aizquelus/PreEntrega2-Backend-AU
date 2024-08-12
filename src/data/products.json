@@ -1,0 +1,52 @@
+[
+     {
+          "id": 1,
+          "title": "Martillo",
+          "description": "Un martillo",
+          "code": "20212820",
+          "price": "500",
+          "status": true,
+          "stock": "50",
+          "category": "herramientas"
+     },
+     {
+          "id": 2,
+          "title": "Destornillador",
+          "description": "Un destornillador",
+          "code": "20212821",
+          "price": "300",
+          "status": true,
+          "stock": "50",
+          "category": "herramientas"
+     },
+     {
+          "id": 3,
+          "title": "Llave Inglesa",
+          "description": "aaaaaaa",
+          "code": "20212822",
+          "price": "200",
+          "status": "false",
+          "stock": "1000",
+          "category": "herramientas"
+     },
+     {
+          "id": 4,
+          "title": "Taladro",
+          "description": "Taladro inalámbrico",
+          "code": "20212823",
+          "price": "200",
+          "status": "false",
+          "stock": "2000",
+          "category": "herramientas"
+     },
+     {
+          "id": 5,
+          "title": "Clavos",
+          "description": "Algunos clavos",
+          "code": "20212825",
+          "price": "300",
+          "status": "false",
+          "stock": "100000000",
+          "category": "materiales"
+     }
+]
