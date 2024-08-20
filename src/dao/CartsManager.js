@@ -60,6 +60,6 @@ export class CartsManager {
 
         await fs.promises.writeFile(this.path, JSON.stringify(carts, null, 5));
 
-        return addedProduct;
+        return cart.products;
     }
 }

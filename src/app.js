@@ -11,9 +11,4 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/products', productsRouter);
 app.use('/api/carts', cartsRouter);
 
-app.get('/', (req, res) => {
-    res.setHeader('Content-Type', 'text/plain');
-    res.status(200).send('OK');
-});
-
 const server = app.listen(PORT, () => console.log(`Server up and running on port ${PORT}`));

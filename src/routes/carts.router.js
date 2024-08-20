@@ -10,7 +10,7 @@ router.get('/:cid', async (req, res) => {
     cid = Number(cid);
 
     if (isNaN(cid)) {
-        res.setHeader('Content-Type', 'text/plain');
+        res.setHeader('Content-Type', 'application/json');
         return res.status(400).json({ error: `The ID must be a number.` });
     }
 
@@ -19,15 +19,15 @@ router.get('/:cid', async (req, res) => {
         carts = await CartsManager.getCarts();
         let cart = carts.find(c => c.id === cid);
         if (!cart) {
-            res.setHeader('Content-Type', 'text/plain');
+            res.setHeader('Content-Type', 'application/json');
             return res.status(404).json({ error: `A cart with the ID ${cid} does not exist...` });
         } else {
             let cartProducts = cart.products;
-            res.setHeader('Content-Type', 'text/plain');
+            res.setHeader('Content-Type', 'application/json');
             return res.status(200).json(cartProducts);
         }
     } catch (error) {
-        res.setHeader('Content-Type', 'text/plain');
+        res.setHeader('Content-Type', 'application/json');
         return res.status(500).json({
             error: `Something went wrong - Try again later.`,
             detail: `${error.message}`
@@ -38,10 +38,10 @@ router.get('/:cid', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         let newCart = await CartsManager.addCart();
-        res.setHeader('Content-Type', 'text/plain');
+        res.setHeader('Content-Type', 'application/json');
         return res.status(200).json(newCart);
     } catch (error) {
-        res.setHeader('Content-Type', 'text/plain');
+        res.setHeader('Content-Type', 'application/json');
         return res.status(500).json({
             error: `Something went wrong - Try again later.`,
             detail: `${error.message}`
@@ -55,16 +55,16 @@ router.post('/:cid/product/:pid', async (req, res) => {
     pid = Number(pid)
 
     if (isNaN(cid) || isNaN(pid)) {
-        res.setHeader('Content-Type', 'text/plain');
+        res.setHeader('Content-Type', 'application/json');
         return res.status(400).json({ error: `The ${isNaN(cid) ? 'Cart ID' : 'Product ID'} must be a number.` });
     }
 
     try {
-        let addedProduct = await CartsManager.addProductToCart(cid, pid);
-        res.setHeader('Content-Type', 'text/plain');
-        return res.status(200).json(addedProduct);
+        let cartProducts = await CartsManager.addProductToCart(cid, pid);
+        res.setHeader('Content-Type', 'application/json');
+        return res.status(200).json(cartProducts);
     } catch (error) {
-        res.setHeader('Content-Type', 'text/plain');
+        res.setHeader('Content-Type', 'application/json');
         return res.status(500).json({
             error: `Something went wrong - Try again later.`,
             detail: `${error.message}`
