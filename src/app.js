@@ -6,6 +6,7 @@ import { router as viewsRouter } from './routes/views.router.js';
 import __dirname from './utils.js';
 import { createServer } from 'http';
 import { Server } from 'socket.io'
+import { connDB } from './connDB.js';
 
 const PORT = 8080;
 const app = express();
@@ -30,3 +31,5 @@ app.use('/', viewsRouter(io));
 
 // Init server
 server.listen(PORT, () => console.log(`Server up and running on port ${PORT}`));
+
+connDB();

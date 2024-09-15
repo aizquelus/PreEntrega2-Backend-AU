@@ -1,0 +1,14 @@
+<header>
+    <h1>Product Details</h1>
+</header>
+<main>
+    <div class="product-detail">
+        <h2>{{product.title}}</h2>
+        <p>Description: {{product.description}}</p>
+        <p>Price: {{product.price}}</p>
+        <p>Category: {{product.category}}</p>
+        <button onclick="addToCart('{{product._id}}')">Add to Cart</button>
+        <a href="/">Back to Products</a>
+    </div>
+</main>
+<script src={{pathToJS}}></script>

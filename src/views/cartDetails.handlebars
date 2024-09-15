@@ -1,0 +1,17 @@
+<header>
+        <h1>Cart Details</h1>
+    </header>
+    <main>
+    <h2>Cart ID: {{cart._id}}</h2>
+    <ul>
+        {{#each cart.products}}
+            <li>
+                <h3>{{title}}</h3>
+                <p>Price: {{price}}</p>
+                <p>Quantity: {{quantity}}</p>
+            </li>
+        {{/each}}
+    </ul>
+    <a href="/">Back to Products</a>
+</main>
+<script src="/js/index.js"></script>

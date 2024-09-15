@@ -1,7 +1,24 @@
-<h1>All these products</h1>
-
-<ul>
-    {{#each products}}
-        <li>{{title}}</li>
-    {{/each}}
-</ul>
+    <header>
+        <h1>All Products</h1>
+    </header>
+    <main>
+    <ul>
+        {{#each products.payload}}
+            <li>
+                <h2>{{title}}</h2>
+                <p>{{description}}</p>
+                <p class="price">{{price}}</p>
+                <p>Category: {{category}}</p>
+                <a href="/products/{{_id}}" class="view-details">View Details</a>
+            <button onclick="addToCart('{{_id}}')">Add to Cart</button>
+            </li>
+        {{/each}}
+    </ul>
+    <div class="pagination-controls">
+        <a href="?page=1" id="first-page">First Page</a>
+        <a href="?page={{products.prevPage}}" id="prev-page" {{#unless products.hasPrevPage}} class="disabled"{{/unless}}>Prev. Page</a>
+        <a href="?page={{products.nextPage}}" id="next-page" {{#unless products.hasNextPage}} class="disabled"{{/unless}}>Next Page</a>
+        <a href="?page={{products.totalPages}}" id="last-page">Last Page</a>
+    </div>
+</main>
+<script src={{pathToJS}}></script>

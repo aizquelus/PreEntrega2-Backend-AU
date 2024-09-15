@@ -1,15 +1,26 @@
 import { Router } from 'express';
-import { ProductsManager } from '../dao/ProductsManager.js';
+import { ProductsManager } from '../dao/ProductsManagerMongo.js';
+import { isValidObjectId } from 'mongoose';
 
 export const router = (io) => {
     const router = Router();
 
-    ProductsManager.path = './src/data/products.json';
-
     router.get('/', async (req, res) => {
+        let { page, limit, sort } = req.query;
+
+        if(!page || isNaN(Number(page))) page = 1;
+
+        if(!limit || isNaN(Number(limit))) limit = 5;
+
+        const validSort = ['asc', 'desc'];
+        sort = validSort.includes(sort) ? sort : '';
+        
         let products;
+
         try {
-            products = await ProductsManager.getProducts();
+            products = await ProductsManager.getProducts(page, limit, sort)
+            res.setHeader('Content-Type','application/json');
+        return res.status(200).json({...products});
         } catch (error) {
             res.setHeader('Content-Type', 'application/json');
             return res.status(500).json({
@@ -17,38 +28,25 @@ export const router = (io) => {
                 detail: `${error.message}`
             });
         }
-
-        let { limit } = req.query;
-
-        if (limit) {
-            limit = Number(limit);
-
-            if (isNaN(limit)) {
-                res.setHeader('Content-Type', 'application/json');
-                return res.status(400).json({ error: `The limit argument must be a number.` });
-            }
-        } else {
-            limit = products.length;
-        }
-
-        let resultado = products.slice(0, limit);
-
-        res.setHeader('Content-Type', 'application/json');
-        return res.status(200).json(resultado);
     });
 
     router.get('/:pid', async (req, res) => {
         let { pid } = req.params;
-        pid = Number(pid)
 
-        if (isNaN(pid)) {
+        if (!isValidObjectId(pid)) {
             res.setHeader('Content-Type', 'application/json');
-            return res.status(400).json({ error: `The ID must be a number.` });
+            return res.status(400).json({ error: `The ID does not have a valid format.` });
         }
 
-        let products;
         try {
-            products = await ProductsManager.getProducts();
+            let product = await ProductsManager.getProductBy({_id:pid})
+            if (!product) {
+                res.setHeader('Content-Type', 'application/json');
+                return res.status(404).json({ error: `Product with ID ${pid} not found...` });
+            }
+    
+            res.setHeader('Content-Type', 'application/json');
+            return res.status(200).json({ product });
         } catch (error) {
             res.setHeader('Content-Type', 'application/json');
             return res.status(500).json({
@@ -56,16 +54,6 @@ export const router = (io) => {
                 detail: `${error.message}`
             });
         }
-
-        let product = products.find(p => p.id === pid);
-
-        if (!product) {
-            res.setHeader('Content-Type', 'application/json');
-            return res.status(404).json({ error: `Product with ID ${pid} not found...` });
-        }
-
-        res.setHeader('Content-Type', 'application/json');
-        return res.status(200).json({ product });
     });
 
     router.post('/', async (req, res) => {
@@ -76,27 +64,11 @@ export const router = (io) => {
             return res.status(400).json({ error: `Complete all required fields` });
         }
 
-        let products;
-        try {
-            products = await ProductsManager.getProducts();
-        } catch (error) {
+        let titleExists = await ProductsManager.getProductBy({title});
+        let codeExists = await ProductsManager.getProductBy({code});
+        if (titleExists || codeExists) {
             res.setHeader('Content-Type', 'application/json');
-            return res.status(500).json({
-                error: `Something went wrong - Try again later.`,
-                detail: `${error.message}`
-            });
-        }
-
-        let titleExists = products.find(p => p.title.toLowerCase() === title.toLowerCase());
-        if (titleExists) {
-            res.setHeader('Content-Type', 'application/json');
-            return res.status(400).json({ error: `A product with the title ${title} already exists...` });
-        }
-
-        let codeExists = products.find(p => p.code.toLowerCase() === code.toLowerCase());
-        if (codeExists) {
-            res.setHeader('Content-Type', 'application/json');
-            return res.status(400).json({ error: `A product with the code ${code} already exists...` });
+            return res.status(400).json({ error: `A product with the ${titleExists ?  `title ${title}`: `code ${code}`} already exists...` });
         }
 
         let productToAdd = {
@@ -126,25 +98,13 @@ export const router = (io) => {
 
     router.put('/:pid', async (req, res) => {
         let { pid } = req.params;
-        pid = Number(pid)
 
-        if (isNaN(pid)) {
+        if (!isValidObjectId(pid)) {
             res.setHeader('Content-Type', 'application/json');
-            return res.status(400).json({ error: `The ID must be a number.` });
+            return res.status(400).json({ error: `The ID does not have a valid format.` });
         }
 
-        let products;
-        try {
-            products = await ProductsManager.getProducts();
-        } catch (error) {
-            res.setHeader('Content-Type', 'application/json');
-            return res.status(500).json({
-                error: `Something went wrong - Try again later.`,
-                detail: `${error.message}`
-            });
-        }
-
-        let product = products.find(p => p.id === pid);
+        let product = await ProductsManager.getProductBy({pid})
         if (!product) {
             res.setHeader('Content-Type', 'application/json');
             return res.status(404).json({ error: `Product with ID ${pid} not found...` });
@@ -155,11 +115,11 @@ export const router = (io) => {
         delete toUpdate.id;
 
         if (toUpdate.title || toUpdate.code) {
-            let exists = products.find(p => (p.title.toLowerCase() === toUpdate.title.toLowerCase() || p.code.toLowerCase() === toUpdate.code.toLowerCase()) && p.id !== id);
-
-            if (exists) {
+            let titleExists = await ProductsManager.getProductBy({title});
+            let codeExists = await ProductsManager.getProductBy({code});
+            if (titleExists || codeExists) {
                 res.setHeader('Content-Type', 'application/json');
-                return res.status(400).json({ error: `A product with the title/code ${toUpdate.title ? toUpdate.title : toUpdate.code} already exists.` });
+                return res.status(400).json({ error: `A product with the ${titleExists ?  `title ${title}`: `code ${code}`} already exists...` });
             }
         }
 
@@ -178,25 +138,21 @@ export const router = (io) => {
 
     router.delete('/:pid', async (req, res) => {
         let { pid } = req.params;
-        pid = Number(pid)
 
-        if (isNaN(pid)) {
+        if (!isValidObjectId(pid)) {
             res.setHeader('Content-Type', 'application/json');
-            return res.status(400).json({ error: `The ID must be a number.` });
+            return res.status(400).json({ error: `The ID does not have a valid format.` });
         }
 
         try {
             let result = await ProductsManager.deleteProduct(pid);
-            if (result > 0) {
+            if (result) {
                 io.emit('productDeleted', pid);
                 res.setHeader('Content-Type', 'application/json');
                 return res.status(200).json(`Product has been deleted successfully.`);
             } else {
-                res.setHeader('Content-Type', 'application/json');
-                return res.status(500).json({
-                    error: `Something went wrong - Try again later.`,
-                    detail: `${error.message}`
-                });
+                res.setHeader('Content-Type','application/json');
+                return res.status(400).json({error:`Couldn't perform deletion. Product with ID ${pid} does not exist!`})
             }
         } catch (error) {
             res.setHeader('Content-Type', 'application/json');
