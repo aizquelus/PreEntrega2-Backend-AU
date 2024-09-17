@@ -14,15 +14,26 @@ export class ProductsManager {
         thumbnails: []
     };
 
-    static async getProducts (page, limit, sortByPrice) {
+    static async getProducts (page, limit, query, sortByPrice, category) {
         let filter = {};
+
+        if (category) {
+            filter.category = { $regex: category, $options: 'i' };
+        }
+
+        if (query) {
+            filter.$or = [
+                { title: { $regex: query, $options: 'i' } },
+                { description: { $regex: query, $options: 'i' } }
+            ];
+        }
 
         const sort = {};
         if (sortByPrice === 'asc' || sortByPrice === 'desc') {
-        sort.price = sortByPrice === 'asc' ? 1 : -1;
-    }
+            sort.price = sortByPrice === 'asc' ? 1 : -1;
+        }
 
-        let products = await productsModel.paginate({}, {lean: true, page, limit, sort});
+        let products = await productsModel.paginate(filter, { lean: true, page, limit, sort });
         products.payload = products.docs;
         delete products.docs;
 

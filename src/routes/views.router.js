@@ -9,7 +9,7 @@ export const router = (io) => {
     const router = Router();
 
     router.get('/', async (req, res) => {
-        let { page, limit, query, sort } = req.query;
+        let { page, limit, query, sort, category } = req.query;
 
         if(!page || isNaN(Number(page))) page = 1;
 
@@ -20,7 +20,7 @@ export const router = (io) => {
 
 
         try {
-            let products = await ProductsManager.getProducts(page, limit, sort);
+            let products = await ProductsManager.getProducts(page, limit, query, sort, category);
             res.render('home', { products, pathToJS });
         } catch (error) {
             res.render('errorPage')
