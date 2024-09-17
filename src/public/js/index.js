@@ -35,8 +35,8 @@ const createCart = async () => {
         const response = await fetch('/api/carts', { method: 'POST' });
         const data = await response.json();
         if (response.ok) {
-            localStorage.setItem('cartId', data.cartId);
-            return data.cartId;
+            sessionStorage.setItem('cartId', data._id);
+            return data._id;
         } else {
             alert(`Error: ${data.error}`);
             return null;
@@ -48,9 +48,8 @@ const createCart = async () => {
     }
 };
 
-// Agregar producto al carrito
 const addToCart = async (productId) => {
-    let cartId = localStorage.getItem('cartId');
+    let cartId = sessionStorage.getItem('cartId');
     if (!cartId) {
         cartId = await createCart();
     }
@@ -117,28 +116,30 @@ const updateProduct = async (id) => {
 // Handle form submission for adding new products
 const form = document.querySelector('form');
 
-form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+if (form) {
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
 
-    try {
-        const response = await fetch('/api/products', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
+        try {
+            const response = await fetch('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
 
-        const result = await response.json();
-        if (response.ok) {
-            alert('Product added!');
-            form.reset();
-        } else {
-            alert(`Error: ${result.error}`);
+            const result = await response.json();
+            if (response.ok) {
+                alert('Product added!');
+                form.reset();
+            } else {
+                alert(`Error: ${result.error}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error adding product.');
         }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error adding product.');
-    }
-});
+    });
+}

@@ -1,8 +1,11 @@
 import { Router } from 'express';
 import { ProductsManager } from '../dao/ProductsManagerMongo.js';
+import { CartsManager } from '../dao/CartsManagerMongo.js';
+import { isValidObjectId } from 'mongoose';
 import __dirname from '../utils.js';
 
 export const router = (io) => {
+    let pathToJS = `/js/index.js`;
     const router = Router();
 
     router.get('/', async (req, res) => {
@@ -18,7 +21,7 @@ export const router = (io) => {
 
         try {
             let products = await ProductsManager.getProducts(page, limit, sort);
-            res.render('home', { products });
+            res.render('home', { products, pathToJS });
         } catch (error) {
             res.render('errorPage')
         }
@@ -33,7 +36,7 @@ export const router = (io) => {
                 return res.render('errorPage', { error: `Product with ID ${pid} not found.` });
             }
             
-            res.render('productDetails', { product });
+            res.render('productDetails', { product, pathToJS });
         } catch (error) {
             res.render('errorPage', { error: 'Something went wrong - Try again later.' });
         }
@@ -43,7 +46,7 @@ export const router = (io) => {
         io.on('connection', socket => {
             console.log(`Cliente conectado - ID ${socket.id} `)
         });
-        let pathToJS = `/js/index.js`;
+
         try {
             let products = await ProductsManager.getProducts();
             res.render('realTimeProducts', { products, pathToJS });
@@ -53,15 +56,21 @@ export const router = (io) => {
     });
 
     router.get('/carts/:cid', async (req, res) => {
-        const { cid } = req.params;
+        let { cid } = req.params;
+
+        if (!isValidObjectId(cid)) {
+        res.setHeader('Content-Type', 'application/json');
+        return res.render('errorPage', { error: `Cart with ID ${cid} not found.` });
+    }
 
         try {
             let cart = await CartsManager.getCartById(cid);
+
             if (!cart) {
                 return res.render('errorPage', { error: `Cart with ID ${cid} not found.` });
             }
 
-            res.render('cartDetails', { cart });
+            res.render('cartDetails', { cart, pathToJS });
         } catch (error) {
             res.render('errorPage', { error: 'Something went wrong - Try again later.' });
         }
