@@ -3,11 +3,18 @@
 <ul id="products-list">
     {{#each products.payload}}
     <li>
-        {{title}}
+        <p>{{title}}</p>
         <button onclick="deleteProduct('{{id}}')" id="deleteBtn-{{id}}" type="button">Delete Product</button>
     </li>
     {{/each}}
 </ul>
+
+<div class="pagination-controls">
+    <a href="?page=1" id="first-page">First Page</a>
+    <a href="?page={{products.prevPage}}" id="prev-page" {{#unless products.hasPrevPage}} class="disabled"{{/unless}}>Prev. Page</a>
+    <a href="?page={{products.nextPage}}" id="next-page" {{#unless products.hasNextPage}} class="disabled"{{/unless}}>Next Page</a>
+    <a href="?page={{products.totalPages}}" id="last-page">Last Page</a>
+</div>
 
 <form action="/api/products" method="post">
     <label for="title">Product Title</label>

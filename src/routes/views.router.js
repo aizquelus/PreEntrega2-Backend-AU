@@ -47,8 +47,18 @@ export const router = (io) => {
             console.log(`Cliente conectado - ID ${socket.id} `)
         });
 
+        let { page, limit, query, sort, category } = req.query;
+
+        if(!page || isNaN(Number(page))) page = 1;
+
+        if(!limit || isNaN(Number(limit))) limit = 10;
+
+        const validSort = ['asc', 'desc'];
+        sort = validSort.includes(sort) ? sort : '';
+
+
         try {
-            let products = await ProductsManager.getProducts();
+            let products = await ProductsManager.getProducts(page, limit, query, sort, category);
             res.render('realTimeProducts', { products, pathToJS });
         } catch (error) {
             res.render('errorPage');
