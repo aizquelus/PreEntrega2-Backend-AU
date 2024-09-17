@@ -6,10 +6,7 @@ socket.on('newProductAdded', (product) => {
     const li = document.createElement('li');
     li.innerHTML = `
         ${product.title} 
-        <button onclick="viewProductDetails('${product._id}')" type="button">View Details</button>
-        <button onclick="addToCart('${product._id}')" type="button">Add to Cart</button>
         <button onclick="deleteProduct('${product._id}')" id="deleteBtn-${product._id}" type="button">Delete Product</button>
-        <button onclick="updateProduct('${product._id}')" id="updateBtn-${product._id}" type="button">Modify Product</button>
     `;
     ul.appendChild(li);
 });
@@ -79,7 +76,6 @@ const deleteProduct = async (id) => {
 
         if (response.ok) {
             alert('Product deleted!');
-            socket.emit('productDeleted', id); // Notify other clients
         } else {
             const errorData = await response.json();
             alert(`Error: ${errorData.error}`);
@@ -90,28 +86,10 @@ const deleteProduct = async (id) => {
     }
 };
 
-// Update product
-const updateProduct = async (id) => {
-    const updatedProduct = { title: 'New Title', description: 'Updated Description' }; // Example data
-
-    try {
-        const response = await fetch(`/api/products/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updatedProduct)
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-            alert('Product updated!');
-        } else {
-            alert(`Error: ${result.error}`);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error updating product.');
-    }
-};
+socket.on('productDeleted', id => {
+    const productElement = document.getElementById(`deleteBtn-${id}`).parentElement;
+    productElement.remove();
+});
 
 // Handle form submission for adding new products
 const form = document.querySelector('form');
