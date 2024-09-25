@@ -6,7 +6,7 @@ export const router = (io) => {
     const router = Router();
 
     router.get('/', async (req, res) => {
-        let { page, limit, sort } = req.query;
+        let { page, limit, query, sort, category } = req.query;
 
         if(!page || isNaN(Number(page))) page = 1;
 
@@ -18,7 +18,7 @@ export const router = (io) => {
         let products;
 
         try {
-            products = await ProductsManager.getProducts(page, limit, sort)
+            products = await ProductsManager.getProducts(page, limit, query, sort, category)
             res.setHeader('Content-Type','application/json');
         return res.status(200).json({...products});
         } catch (error) {
