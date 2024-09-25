@@ -10,7 +10,7 @@ export const router = (io) => {
 
         if(!page || isNaN(Number(page))) page = 1;
 
-        if(!limit || isNaN(Number(limit))) limit = 5;
+        if(!limit || isNaN(Number(limit))) limit = 10;
 
         const validSort = ['asc', 'desc'];
         sort = validSort.includes(sort) ? sort : '';
